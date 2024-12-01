@@ -47,39 +47,26 @@ export const CreateRoom = async (c: Context) => {
   }
 }
 
-export const getRooms = async (c: Context) => {
+export const JoinRoom = async (c: Context) => {
   const db = getDb(c.env);
+  const roomId  = c.req.param('roomId');
 
-  try {
-    const allRooms = await db.select().from(rooms);
-  
-    return c.json(allRooms);
-  } catch (error) {
+  const { playerName } = await c.req.json();
 
-    console.error('Error fetching rooms:', error);
-    return c.text('Error fetching rooms', 500);
+  const room = await db.select().from(rooms).where(rooms.id.eq(roomId)).first();
+
+  if (!room) {
+    return c.json({ success: false, error: 'Room not found' }, 404);
   }
-};
 
-export const getRoom = async (c: Context) => {
-  const db = getDb(c.env);
-  const { roomId } = c.req.param();
+  const roomPlayers = await db.select().from(players).where(players.roomId.eq(roomId));
 
-   try {
-    const room = await db.select().from(rooms).where(rooms.id.eq(roomId)).first();
-  
-    if (!room) {
-      return c.text('Room not found', 404);
-    }
-
-    const roomPlayers = await db.select().from(players).where(players.roomId.eq(roomId));
-
-    return c.json({
-      ...room,
-      players: roomPlayers,
-    });
-  } catch (error) {
-    console.error('Error fetching room:', error);
-    return c.text('Error fetching room', 500);
+  if (roomPlayers.length >= room.maxPlayers) {
+    return c.json({ success: false, error: 'Room is full' }, 400);
   }
-};
+
+  const playerId = crypto.randomUUID();
+  await db.insert(players).values({ id: playerId, name: playerName, roomId });
+
+  return c.json({ success: true, player: { id: playerId, name: playerName, roomId }});
+}

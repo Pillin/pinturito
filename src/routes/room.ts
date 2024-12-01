@@ -1,10 +1,9 @@
 import { Hono } from 'hono';
-import { CreateRoom, getRooms, getRoom } from '../controllers/room'
+import { CreateRoom, JoinRoom } from '../controllers/room'
 
 const roomRouter = new Hono();
 
 roomRouter.post('/', CreateRoom);
-roomRouter.get('/', getRooms);
-roomRouter.get('/:roomId', getRoom);
+roomRouter.post('/:roomId/join', JoinRoom)
 
 export default roomRouter
