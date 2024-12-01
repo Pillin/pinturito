@@ -4,8 +4,8 @@ name = "pinturito"
 
 [[d1_databases]]
 binding = "DB"
-database_id = "<DATABASE_ID>"
-database_name = "<DATABASE_NAME>"
+database_id = "75c032f2-b012-4e2f-bce7-63128c5eaff8"
+database_name = "pinturito-db"
 migrations_dir = "drizzle/migrations"
 
 # [vars]
